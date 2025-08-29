@@ -12,7 +12,13 @@ u2=v;
 
 
 for j=1:10
-    um=u1-f_1/(f_2-f_1)*(u2-u1);
+    
+    fac=0.8*f_1/(f_2-f_1);
+    if abs(fac)>0.8
+        fac=sign(fac)*0.8;
+    end
+    
+    um=u1-fac*(u2-u1);
 
     for i=1:parametros.i_max
         %Corretor
@@ -45,10 +51,10 @@ for j=1:10
     
 end
 
-if(size(J_um,2)-rank(J_um, parametros.tol1)==2)
-    tipo='BPS'; % Ponto de ramificacao simples
+if(size(J_um,2)-rank(full(J_um), parametros.tol1)==2)
+    tipo='PRS'; % Ponto de ramificacao simples
 else
-    tipo='BPC'; % Ponto de ramificacao complexo
+    tipo='PRC'; % Ponto de ramificacao complexo
 end
 
 fprintf(id_saida, '%s;', tipo);
@@ -57,6 +63,7 @@ for i=1:numel(um)
 end
 fprintf(id_saida, '\n');
 hold on;
-plot(um(end,1), um(1,1), 'ko');
+plot(um(modelo.outdof1,1), um(modelo.outdof2,1), 'ko');
+text(um(modelo.outdof1,1), um(modelo.outdof2,1), 'PR', 'VerticalAlignment', 'bottom'); %Ponto regular
 
 end

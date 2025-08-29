@@ -3,7 +3,9 @@ function continuacao()
 
 %Inicializacao das variaveis iniciais, do modelo e dos parametros
 [u, t_u, estabilidade_u, h, w, modelo, parametros, id_saida]=inicializacao();
-%[u, t_u, estabilidade_u, h, w, modelo, parametros, id_saida]=inicializacao_ponto_de_ramificacao(); 
+
+global u_atual
+u_atual=u;
 
 % Algoritmo de continuacao
 for cont=1:parametros.cont_max
@@ -13,14 +15,16 @@ for cont=1:parametros.cont_max
         break;
     end
     
-    % preditor
+    % Preditor
     v=u+h*w*t_u;
 
     for i=1:parametros.i_max
-        %Corretor
+        % Corretor
         [H]=feval(modelo.residuo,v);
         [J_v]=feval(modelo.jacobiana,v);
-        dv=pinv(J_v)*H;
+        dv=lsqminnorm(J_v, H);
+        %dv=pinv(J_v)*H;
+        
         v=v-dv;
 
         erro1=norm(H, 2);
@@ -38,7 +42,7 @@ for cont=1:parametros.cont_max
             continue;
         end
     end
-
+    
     % Verificar bifurcacoes
     [estabilidade_v]=feval(modelo.estabilidade, v, J_v, modelo);
     
@@ -55,18 +59,20 @@ for cont=1:parametros.cont_max
         determinar_ponto_de_ramificacao(u, v, modelo, parametros, id_saida);
         w=-w;
     end
-
+    
     %Inicializacao das variaveis para proximo ponto da curva
     u=v;
     t_u=t_v;
     J_u=J_v;
     estabilidade_u=estabilidade_v;
     
-    % Impressão de resultados parciais em tela
+    u_atual=u;
+    
+    % Impressao de resultados parciais em tela
     fprintf('n=%i   i=%i  erro1=%e   erro2=%e   h=%e  estabilidade=%e \n', cont, i, erro1, erro2, h, estabilidade_v);
     
     % Saida dos resultados
-    salvar_resultados(u, estabilidade_u, id_saida);
+    salvar_resultados(u, estabilidade_u, id_saida, modelo);
     
     %Ajustar tamanho do passo
     [h]=ajustar_passo(i, h, parametros);

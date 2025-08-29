@@ -17,8 +17,14 @@ else
 end
 
 for j=1:10
-    um=u1-estabilidade_u1/(estabilidade_u2-estabilidade_u1)*(u2-u1);
-
+    
+    fac=0.8*estabilidade_u1/(estabilidade_u2-estabilidade_u1);
+    if abs(fac)>0.8
+        fac=sign(fac)*0.8;
+    end
+    
+    um=u1-fac*(u2-u1);
+    
     for i=1:parametros.i_max
         %Corretor
         [H]=feval(modelo.residuo,um);
@@ -47,7 +53,6 @@ for j=1:10
         u1=um;
         estabilidade_u1=estabilidade_um;
     end
-    
 end
 
 fprintf(id_saida, '%s;', tipo);
@@ -56,6 +61,7 @@ for i=1:numel(um)
 end
 fprintf(id_saida, '\n');
 hold on;
-plot(um(end,1), um(1,1), 'ks');
+plot(um(modelo.outdof1,1), um(modelo.outdof2,1), 'ks');
+text(um(modelo.outdof1,1), um(modelo.outdof2,1), 'PB', 'VerticalAlignment', 'bottom');
 
 end

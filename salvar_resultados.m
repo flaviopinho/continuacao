@@ -1,4 +1,4 @@
-function salvar_resultados(u, teste, id_saida)
+function salvar_resultados(u, teste, id_saida, modelo)
 
     if(teste<0)
         tipo='PRE'; % Ponto regular estável
@@ -12,8 +12,9 @@ function salvar_resultados(u, teste, id_saida)
     fprintf(id_saida, '\n');
     hold on;
     if(teste<0)
-        plot(u(end,1), u(1,1), 'b.');
+        plot(u(modelo.outdof1,1), u(modelo.outdof2,1), 'b.');
     else
-        plot(u(end,1), u(1,1), 'r.');
+        plot(u(modelo.outdof1,1), u(modelo.outdof2,1), 'r.');
     end
+    drawnow;
 end
